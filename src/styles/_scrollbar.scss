@@ -1,0 +1,27 @@
+// ============================================================
+// Custom Scrollbar — Nothing-Inspired
+// ============================================================
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-visible);
+  border-radius: var(--radius-pill);
+
+  &:hover {
+    background: var(--text-disabled);
+  }
+}
+
+// Firefox
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-visible) transparent;
+}

@@ -1,0 +1,86 @@
+// ============================================================
+// StockSmart — Global Styles
+// Nothing-Inspired Design System (Swiss Typography & Industrial Precision)
+// ============================================================
+
+@import 'styles/tokens';
+@import 'styles/typography';
+@import 'styles/components';
+@import 'styles/layout';
+@import 'styles/scrollbar';
+
+// === Reset ===
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  background-color: var(--black);
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--body);
+  line-height: var(--lh-body);
+  color: var(--text-primary);
+  background-color: var(--black);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--interactive);
+  text-decoration: none;
+  transition: color var(--duration-micro) var(--ease-out);
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--interactive);
+    outline-offset: 2px;
+  }
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+// Global focus ring
+:focus-visible {
+  outline: 2px solid var(--interactive);
+  outline-offset: 2px;
+}
+
+// Text selection
+::selection {
+  background: var(--text-primary);
+  color: var(--black);
+}

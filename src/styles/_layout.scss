@@ -1,0 +1,95 @@
+// ============================================================
+// Layout Utilities — Nothing-Inspired
+// ============================================================
+
+.layout {
+  &-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  &-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  &-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &-wrap {
+    flex-wrap: wrap;
+  }
+
+  &-gap-xs  { gap: var(--space-xs); }
+  &-gap-sm  { gap: var(--space-sm); }
+  &-gap-md  { gap: var(--space-md); }
+  &-gap-lg  { gap: var(--space-lg); }
+  &-gap-xl  { gap: var(--space-xl); }
+}
+
+// Page container
+.page {
+  padding: var(--space-lg);
+  max-width: 1440px;
+  width: 100%;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+
+  &__title {
+    font-family: var(--font-body);
+    font-size: var(--heading);
+    line-height: var(--lh-heading);
+    letter-spacing: var(--ls-heading);
+    color: var(--text-display);
+    font-weight: 500;
+  }
+
+  &__subtitle {
+    font-family: var(--font-data);
+    font-size: var(--caption);
+    letter-spacing: var(--ls-label);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-top: var(--space-xs);
+  }
+}
+
+// Grid
+.grid {
+  display: grid;
+  gap: var(--space-md);
+
+  &--2 { grid-template-columns: repeat(2, 1fr); }
+  &--3 { grid-template-columns: repeat(3, 1fr); }
+  &--4 { grid-template-columns: repeat(4, 1fr); }
+  &--auto { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+  @media (max-width: 1024px) {
+    &--4 { grid-template-columns: repeat(2, 1fr); }
+    &--3 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 640px) {
+    &--4,
+    &--3,
+    &--2 { grid-template-columns: 1fr; }
+  }
+}
