@@ -592,6 +592,8 @@ export class AppShellComponent {
         { label: 'Products', route: '/catalog/products' },
         { label: 'Categories', route: '/catalog/categories' },
         { label: 'Brands', route: '/catalog/brands' },
+        { label: 'CSV Ingestion', route: '/catalog/import' },
+        { label: 'Label Generator', route: '/catalog/labels' },
       ],
     },
     {
@@ -604,6 +606,7 @@ export class AppShellComponent {
         { label: 'Adjustments', route: '/inventory/adjustments' },
         { label: 'Transfers', route: '/inventory/transfers' },
         { label: 'Counts', route: '/inventory/counts' },
+        { label: 'Dead Stock', route: '/inventory/dead-stock' },
       ],
     },
     {
@@ -612,18 +615,34 @@ export class AppShellComponent {
       children: [
         { label: 'Purchase Orders', route: '/procurement/orders' },
         { label: 'Suggestions', route: '/procurement/suggestions' },
+        { label: 'Policies & Rules', route: '/procurement/rules' },
       ],
     },
     {
       label: 'Suppliers', icon: '◇', route: '/suppliers',
       roles: ['admin', 'inventory_manager', 'buyer'],
+      children: [
+        { label: 'Vendors List', route: '/suppliers' },
+        { label: 'Compare Vendors', route: '/suppliers/compare' },
+      ]
     },
     {
       label: 'Orders', icon: '⬜', route: '/orders',
       roles: ['admin', 'inventory_manager', 'store_clerk'],
+      children: [
+        { label: 'Outbound Orders', route: '/orders' },
+        { label: 'Returns (RMA)', route: '/orders/returns' },
+        { label: 'POS Terminal', route: '/orders/pos-sim' },
+      ]
     },
     { label: 'Scan Lookup', icon: '⊞', route: '/scan' },
-    { label: 'Barcodes & RFID', icon: '⦀', route: '/identification/barcodes' },
+    {
+      label: 'Barcodes & RFID', icon: '⦀', route: '/identification',
+      children: [
+        { label: 'Barcodes Master', route: '/identification/barcodes' },
+        { label: 'RFID Portal Gateway', route: '/identification/rfid' },
+      ]
+    },
     {
       label: 'Reports', icon: '▨', route: '/reports',
       roles: ['admin', 'inventory_manager', 'buyer'],
@@ -631,16 +650,24 @@ export class AppShellComponent {
         { label: 'Executive KPIs', route: '/reports/kpis' },
         { label: 'Stock Valuation', route: '/reports/valuation' },
         { label: 'Stockouts & Depletion', route: '/reports/stockouts' },
+        { label: 'ABC Pareto Analysis', route: '/reports/abc' },
       ],
     },
-    { label: 'Alerts', icon: '◎', route: '/alerts' },
+    {
+      label: 'Alerts', icon: '◎', route: '/alerts',
+      children: [
+        { label: 'Alerts Center', route: '/alerts' },
+        { label: 'Threshold Rules', route: '/alerts/rules' },
+      ]
+    },
     {
       label: 'Admin', icon: '⚙', route: '/admin',
       roles: ['admin'],
       children: [
-        { label: 'Users', route: '/admin/users' },
+        { label: 'Users & Roles', route: '/admin/users' },
         { label: 'Audit Log', route: '/admin/audit' },
         { label: 'Reason Codes', route: '/admin/reason-codes' },
+        { label: 'System Architecture', route: '/admin/settings' },
       ],
     },
   ];

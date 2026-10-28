@@ -37,6 +37,8 @@ export class MockDataService {
   readonly alerts = signal<Alert[]>([]);
   readonly auditLogs = signal<AuditLogEntry[]>([]);
   readonly reasonCodes = signal<ReasonCode[]>(this.generateReasonCodes());
+  readonly users = signal<User[]>(this.generateUsers());
+  readonly suggestions = signal<ReorderSuggestion[]>([]);
 
   // Active selected location for topbar switcher
   readonly selectedLocationId = signal<string>('all');
@@ -45,6 +47,7 @@ export class MockDataService {
     this.initInventoryAndOrders();
     this.initAlerts();
     this.initAuditLogs();
+    this.initSuggestions();
   }
 
   // Set active location scope
@@ -750,6 +753,349 @@ export class MockDataService {
       { id: 'rc-5', code: 'RET-DEFECT', description: 'Customer return defective hardware', category: 'return', isActive: true, sortOrder: 5 },
       { id: 'rc-6', code: 'RET-WRONG', description: 'Customer received incorrect variant', category: 'return', isActive: true, sortOrder: 6 }
     ];
+  }
+
+  private generateUsers(): User[] {
+    return [
+      { id: 'usr-001', email: 'admin@stocksmart.io', firstName: 'Sarah', lastName: 'Chen', role: 'admin', assignedLocationIds: [], isActive: true, lastLogin: '2024-01-15T09:30:00Z', createdAt: '2023-01-01T00:00:00Z' },
+      { id: 'usr-002', email: 'manager@stocksmart.io', firstName: 'James', lastName: 'Wilson', role: 'inventory_manager', assignedLocationIds: [], isActive: true, lastLogin: '2024-01-15T08:00:00Z', createdAt: '2023-02-15T00:00:00Z' },
+      { id: 'usr-003', email: 'buyer@stocksmart.io', firstName: 'Maria', lastName: 'Garcia', role: 'buyer', assignedLocationIds: [], isActive: true, lastLogin: '2024-01-15T10:00:00Z', createdAt: '2023-03-01T00:00:00Z' },
+      { id: 'usr-004', email: 'clerk@stocksmart.io', firstName: 'David', lastName: 'Kim', role: 'store_clerk', assignedLocationIds: ['loc-001', 'loc-002'], isActive: true, lastLogin: '2024-01-15T07:00:00Z', createdAt: '2023-04-01T00:00:00Z' },
+      { id: 'usr-005', email: 'viewer@stocksmart.io', firstName: 'Emma', lastName: 'Thompson', role: 'viewer', assignedLocationIds: [], isActive: true, lastLogin: '2024-01-14T16:00:00Z', createdAt: '2023-05-01T00:00:00Z' }
+    ];
+  }
+
+  private initSuggestions(): void {
+    const prods = this.products();
+    const locs = this.locations();
+    const sups = this.suppliers();
+    const suggestions: ReorderSuggestion[] = [];
+
+    const lowStockLevels = this.stockLevels().filter(s => s.status === 'low_stock' || s.status === 'out_of_stock').slice(0, 15);
+    lowStockLevels.forEach((s, idx) => {
+      const prod = prods.find(p => p.id === s.productId) || prods[0];
+      const sup = sups[idx % sups.length];
+      const urgency: ReorderSuggestion['urgency'] = s.quantityOnHand === 0 ? 'critical' : s.quantityOnHand < 5 ? 'high' : 'medium';
+      suggestions.push({
+        id: `sug-${idx + 1}`,
+        productId: prod.id,
+        productSku: prod.sku,
+        productName: prod.name,
+        locationId: s.locationId,
+        locationName: s.locationName,
+        currentStock: s.quantityOnHand,
+        reorderPoint: s.reorderPoint,
+        suggestedQuantity: s.reorderQuantity,
+        preferredSupplierId: sup.id,
+        preferredSupplierName: sup.name,
+        estimatedCost: s.reorderQuantity * prod.unitCost,
+        urgency,
+        daysUntilStockout: s.quantityOnHand === 0 ? 0 : Math.max(1, Math.floor(s.quantityOnHand / 3))
+      });
+    });
+    this.suggestions.set(suggestions);
+  }
+
+  // --- CRUD & Mutations ---
+
+  addProduct(product: Partial<Product>): Product {
+    const newId = `prod-${this.products().length + 1}`;
+    const newProduct: Product = {
+      id: newId,
+      sku: product.sku || `SKU-${1000 + this.products().length + 1}`,
+      name: product.name || 'Untitled Hardware',
+      description: product.description || '',
+      categoryId: product.categoryId || 'cat-01',
+      brandId: product.brandId || 'br-01',
+      unitOfMeasure: product.unitOfMeasure || 'PCS',
+      weight: product.weight || 0.5,
+      dimensions: product.dimensions || { length: 10, width: 10, height: 5 },
+      barcodes: product.barcodes || [{ id: `bc-${newId}`, code: `735008${Math.floor(100000 + Math.random() * 900000)}`, type: 'EAN13', isPrimary: true }],
+      variants: product.variants || [],
+      images: product.images || ['assets/products/placeholder.svg'],
+      reorderPoint: product.reorderPoint || 20,
+      reorderQuantity: product.reorderQuantity || 100,
+      unitCost: product.unitCost || 50,
+      unitPrice: product.unitPrice || 99,
+      isActive: product.isActive !== undefined ? product.isActive : true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    this.products.update(list => [newProduct, ...list]);
+
+    // Initialize stock for all locations
+    const newLevels: StockLevel[] = this.locations().map(loc => ({
+      id: `sl-${newProduct.id}-${loc.id}`,
+      productId: newProduct.id,
+      productSku: newProduct.sku,
+      productName: newProduct.name,
+      locationId: loc.id,
+      locationName: loc.name,
+      quantityOnHand: 0,
+      quantityReserved: 0,
+      quantityAvailable: 0,
+      quantityInTransit: 0,
+      reorderPoint: newProduct.reorderPoint,
+      reorderQuantity: newProduct.reorderQuantity,
+      status: 'out_of_stock',
+      lastCountDate: null,
+      lastMovementDate: new Date().toISOString(),
+      unitCost: newProduct.unitCost,
+      totalValue: 0
+    }));
+
+    this.stockLevels.update(levels => [...newLevels, ...levels]);
+    return newProduct;
+  }
+
+  updateProduct(id: string, updates: Partial<Product>): void {
+    this.products.update(list => list.map(p => p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p));
+  }
+
+  deleteProduct(id: string): void {
+    this.products.update(list => list.filter(p => p.id !== id));
+    this.stockLevels.update(list => list.filter(s => s.productId !== id));
+  }
+
+  addLocation(location: Partial<Location>): Location {
+    const newId = `loc-${this.locations().length + 1}`;
+    const newLoc: Location = {
+      id: newId,
+      code: location.code || `LOC-${newId.toUpperCase()}`,
+      name: location.name || 'New Facility',
+      type: location.type || 'warehouse',
+      address: location.address || '',
+      city: location.city || '',
+      state: location.state || '',
+      zipCode: location.zipCode || '',
+      country: location.country || 'USA',
+      isActive: true,
+      managerId: 'usr-002',
+      managerName: 'James Wilson',
+      totalSKUs: 0,
+      totalValue: 0
+    };
+    this.locations.update(list => [...list, newLoc]);
+    return newLoc;
+  }
+
+  updateLocation(id: string, updates: Partial<Location>): void {
+    this.locations.update(list => list.map(l => l.id === id ? { ...l, ...updates } : l));
+  }
+
+  addMovement(movement: Partial<InventoryMovement>): void {
+    const newMvt: InventoryMovement = {
+      id: `mvt-${Date.now()}`,
+      type: movement.type || 'adjustment',
+      productId: movement.productId!,
+      productSku: movement.productSku!,
+      productName: movement.productName!,
+      locationId: movement.locationId!,
+      locationName: movement.locationName!,
+      quantity: movement.quantity || 1,
+      previousQuantity: movement.previousQuantity || 0,
+      newQuantity: movement.newQuantity || 0,
+      unitCost: movement.unitCost || 0,
+      totalCost: (movement.quantity || 1) * (movement.unitCost || 0),
+      referenceType: movement.referenceType || 'MANUAL',
+      referenceId: movement.referenceId || `REF-${Date.now()}`,
+      notes: movement.notes || '',
+      createdBy: 'usr-001',
+      createdByName: 'Operator',
+      createdAt: new Date().toISOString()
+    };
+    this.movements.update(list => [newMvt, ...list]);
+
+    // Update stock level
+    this.stockLevels.update(levels => levels.map(sl => {
+      if (sl.productId === newMvt.productId && sl.locationId === newMvt.locationId) {
+        const onHand = newMvt.newQuantity;
+        const available = Math.max(0, onHand - sl.quantityReserved);
+        const status = onHand === 0 ? 'out_of_stock' : onHand <= sl.reorderPoint ? 'low_stock' : 'in_stock';
+        return { ...sl, quantityOnHand: onHand, quantityAvailable: available, status, totalValue: onHand * sl.unitCost, lastMovementDate: new Date().toISOString() };
+      }
+      return sl;
+    }));
+  }
+
+  createAdjustment(adj: Partial<StockAdjustment>): StockAdjustment {
+    const newAdj: StockAdjustment = {
+      id: `adj-${Date.now()}`,
+      adjustmentNumber: `ADJ-${1000 + this.adjustments().length + 1}`,
+      locationId: adj.locationId!,
+      locationName: adj.locationName!,
+      productId: adj.productId!,
+      productSku: adj.productSku!,
+      productName: adj.productName!,
+      reason: adj.reason || 'correction',
+      quantityBefore: adj.quantityBefore || 0,
+      quantityChange: adj.quantityChange || 0,
+      quantityAfter: (adj.quantityBefore || 0) + (adj.quantityChange || 0),
+      unitCost: adj.unitCost || 0,
+      totalCostImpact: Math.abs(adj.quantityChange || 0) * (adj.unitCost || 0),
+      notes: adj.notes || '',
+      createdBy: 'usr-002',
+      createdByName: 'James Wilson',
+      approvedBy: 'usr-001',
+      createdAt: new Date().toISOString()
+    };
+
+    this.adjustments.update(list => [newAdj, ...list]);
+
+    // Register movement
+    this.addMovement({
+      type: 'adjustment',
+      productId: newAdj.productId,
+      productSku: newAdj.productSku,
+      productName: newAdj.productName,
+      locationId: newAdj.locationId,
+      locationName: newAdj.locationName,
+      quantity: Math.abs(newAdj.quantityChange),
+      previousQuantity: newAdj.quantityBefore,
+      newQuantity: newAdj.quantityAfter,
+      unitCost: newAdj.unitCost,
+      referenceType: 'ADJUSTMENT',
+      referenceId: newAdj.adjustmentNumber,
+      notes: newAdj.notes
+    });
+
+    return newAdj;
+  }
+
+  createTransfer(transfer: Partial<StockTransfer>): StockTransfer {
+    const newTr: StockTransfer = {
+      id: `tr-${Date.now()}`,
+      transferNumber: `TR-2024-${100 + this.transfers().length + 1}`,
+      fromLocationId: transfer.fromLocationId!,
+      fromLocationName: transfer.fromLocationName!,
+      toLocationId: transfer.toLocationId!,
+      toLocationName: transfer.toLocationName!,
+      status: 'pending_approval',
+      items: transfer.items || [],
+      notes: transfer.notes || '',
+      requestedBy: 'usr-004',
+      requestedByName: 'David Kim',
+      approvedBy: null,
+      approvedByName: null,
+      dispatchedAt: null,
+      receivedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    this.transfers.update(list => [newTr, ...list]);
+    return newTr;
+  }
+
+  updateTransferStatus(id: string, status: StockTransfer['status']): void {
+    this.transfers.update(list => list.map(t => {
+      if (t.id === id) {
+        const now = new Date().toISOString();
+        return {
+          ...t,
+          status,
+          approvedBy: status === 'approved' ? 'usr-001' : t.approvedBy,
+          approvedByName: status === 'approved' ? 'Sarah Chen' : t.approvedByName,
+          dispatchedAt: status === 'dispatched' ? now : t.dispatchedAt,
+          receivedAt: status === 'received' ? now : t.receivedAt,
+          updatedAt: now
+        };
+      }
+      return t;
+    }));
+  }
+
+  createPurchaseOrder(po: Partial<PurchaseOrder>): PurchaseOrder {
+    const newPo: PurchaseOrder = {
+      id: `po-${Date.now()}`,
+      poNumber: `PO-2024-${100 + this.purchaseOrders().length + 1}`,
+      supplierId: po.supplierId!,
+      supplierName: po.supplierName!,
+      locationId: po.locationId!,
+      locationName: po.locationName!,
+      status: 'approved',
+      items: po.items || [],
+      subtotal: po.subtotal || 0,
+      taxAmount: (po.subtotal || 0) * 0.08,
+      shippingCost: 500,
+      totalAmount: (po.subtotal || 0) * 1.08 + 500,
+      currency: 'USD',
+      expectedDeliveryDate: po.expectedDeliveryDate || new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
+      actualDeliveryDate: null,
+      notes: po.notes || 'Automated replenishment generation',
+      createdBy: 'usr-003',
+      createdByName: 'Maria Garcia',
+      approvedBy: 'usr-001',
+      approvedByName: 'Sarah Chen',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      statusHistory: [
+        { id: `sh-${Date.now()}`, status: 'approved', changedBy: 'usr-001', changedByName: 'Sarah Chen', changedAt: new Date().toISOString(), notes: 'System authorized order' }
+      ]
+    };
+    this.purchaseOrders.update(list => [newPo, ...list]);
+    return newPo;
+  }
+
+  updatePOStatus(id: string, status: PurchaseOrder['status']): void {
+    this.purchaseOrders.update(list => list.map(po => {
+      if (po.id === id) {
+        return {
+          ...po,
+          status,
+          updatedAt: new Date().toISOString(),
+          statusHistory: [
+            ...po.statusHistory,
+            { id: `sh-${Date.now()}`, status, changedBy: 'usr-001', changedByName: 'Sarah Chen', changedAt: new Date().toISOString(), notes: `Status set to ${status}` }
+          ]
+        };
+      }
+      return po;
+    }));
+  }
+
+  receiveGoods(poId: string, receivedItems: { productId: string; qtyReceived: number; damaged: number; notes: string }[]): void {
+    const po = this.purchaseOrders().find(p => p.id === poId);
+    if (!po) return;
+
+    receivedItems.forEach(item => {
+      const prod = this.products().find(p => p.id === item.productId);
+      if (prod) {
+        const currentStock = this.stockLevels().find(s => s.productId === prod.id && s.locationId === po.locationId);
+        const prev = currentStock ? currentStock.quantityOnHand : 0;
+        const validQty = item.qtyReceived - item.damaged;
+
+        this.addMovement({
+          type: 'receipt',
+          productId: prod.id,
+          productSku: prod.sku,
+          productName: prod.name,
+          locationId: po.locationId,
+          locationName: po.locationName,
+          quantity: validQty,
+          previousQuantity: prev,
+          newQuantity: prev + validQty,
+          unitCost: prod.unitCost,
+          referenceType: 'PO_RECEIPT',
+          referenceId: po.poNumber,
+          notes: `Goods receipt for ${po.poNumber} (${item.damaged} damaged units recorded)`
+        });
+      }
+    });
+
+    this.updatePOStatus(poId, 'received');
+  }
+
+  markAlertRead(id: string): void {
+    this.alerts.update(list => list.map(a => a.id === id ? { ...a, isRead: true } : a));
+  }
+
+  dismissAlert(id: string): void {
+    this.alerts.update(list => list.filter(a => a.id !== id));
+  }
+
+  markAllAlertsRead(): void {
+    this.alerts.update(list => list.map(a => ({ ...a, isRead: true })));
   }
 
   // Lookup helper for scan & quick identification

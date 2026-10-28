@@ -97,6 +97,62 @@ import { TableColumn, StockLevel, Product } from '../../core/models';
         />
       </div>
 
+      <!-- Sales vs Stock Ingestion Velocity Chart (Nothing-style line & instrument viz) -->
+      <div class="card velocity-chart-card" style="margin-bottom: var(--space-xl);">
+        <div class="layout-between" style="margin-bottom: var(--space-md);">
+          <div>
+            <h2 class="text-subheading">SALES VELOCITY VS. REPLENISHMENT INGESTION</h2>
+            <p class="text-caption text-secondary">6-MONTH TREND • SOLID LINE: SALES UNITS • DASHED LINE: STOCK RECEIVED</p>
+          </div>
+          <div class="layout-row layout-gap-md">
+            <span class="text-caption text-display">― OUTBOUND SALES (14.2K)</span>
+            <span class="text-caption text-secondary">╌ INBOUND STOCK (16.8K)</span>
+          </div>
+        </div>
+
+        <div class="velocity-svg-wrapper">
+          <svg viewBox="0 0 900 160" preserveAspectRatio="none" style="width: 100%; height: 160px;">
+            <!-- Horizontal Grid Lines -->
+            <line x1="0" y1="40" x2="900" y2="40" stroke="var(--border)" stroke-width="1" />
+            <line x1="0" y1="80" x2="900" y2="80" stroke="var(--border)" stroke-width="1" />
+            <line x1="0" y1="120" x2="900" y2="120" stroke="var(--border)" stroke-width="1" />
+
+            <!-- Inbound Stock Velocity (Dashed) -->
+            <polyline
+              points="40,110 200,90 360,70 520,100 680,50 840,65"
+              fill="none"
+              stroke="var(--text-secondary)"
+              stroke-width="1.5"
+              stroke-dasharray="4 4"
+            />
+
+            <!-- Outbound Sales Velocity (Solid White/Display) -->
+            <polyline
+              points="40,120 200,95 360,85 520,60 680,45 840,30"
+              fill="none"
+              stroke="var(--text-display)"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+
+            <!-- Data Point Markers -->
+            <circle cx="840" cy="30" r="4" fill="var(--text-display)" />
+            <circle cx="840" cy="65" r="3" fill="var(--text-secondary)" />
+          </svg>
+
+          <!-- X-Axis Labels -->
+          <div class="layout-between text-caption text-disabled" style="padding: 4px 20px 0 20px;">
+            <span>MAY</span>
+            <span>JUN</span>
+            <span>JUL</span>
+            <span>AUG</span>
+            <span>SEP</span>
+            <span>OCT (CURRENT)</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Main Operational Split -->
       <div class="dashboard-split">
         <!-- Stock Levels Data Table -->
