@@ -22,7 +22,7 @@ import { AuthService } from '../../core/services/auth.service';
           <a href="#roles" class="nav-link">ROLES</a>
           <a href="#architecture" class="nav-link">ARCHITECTURE</a>
           <a routerLink="/login" class="nav-link">OPERATOR LOGIN</a>
-          <a href="https://github.com/atharavagarwal/STOCKSMART" target="_blank" rel="noopener" class="nav-link">GITHUB</a>
+          <a href="https://github.com/atharav9927/STOCKSMART" target="_blank" rel="noopener" class="nav-link">GITHUB</a>
         </nav>
 
         <div class="header-actions">
@@ -66,7 +66,7 @@ import { AuthService } from '../../core/services/auth.service';
           <a routerLink="/login" class="btn btn--outline btn--lg">
             [ ROLE CLEARANCE LOGIN ]
           </a>
-          <a href="https://github.com/atharavagarwal/STOCKSMART" target="_blank" rel="noopener" class="btn btn--ghost btn--lg">
+          <a href="https://github.com/atharav9927/STOCKSMART" target="_blank" rel="noopener" class="btn btn--ghost btn--lg">
             [ VIEW SOURCE CODE ]
           </a>
         </div>
