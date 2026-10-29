@@ -5,9 +5,18 @@
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Java](https://img.shields.io/badge/Java-21%2B-blue.svg)]()
 [![Design System](https://img.shields.io/badge/Design_System-Nothing_OS-black.svg)]()
+[![GitHub Pages](https://img.shields.io/badge/demo-live_on_github_pages-brightgreen.svg)](https://atharav9927.github.io/STOCKSMART/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)]()
 
 > **StockSmart** is a dense, high-performance retail inventory optimization and operations management platform designed for warehouse and store personnel. Built with the **Nothing OS / Swiss industrial design language** (`Doto`, `Space Grotesk`, `Space Mono` typography, monochromatic canvas, zero gradients/shadows, and signal-red alerts), it combines an **Angular 17+** signal-based frontend with a robust **Spring Boot 3 REST API** supporting dual H2 in-memory local dev and production PostgreSQL persistence.
+
+---
+
+## 🚀 Live Demo & Repository
+- **GitHub Repository**: [https://github.com/atharav9927/STOCKSMART](https://github.com/atharav9927/STOCKSMART)
+- **Live Demo (GitHub Pages)**: [https://atharav9927.github.io/STOCKSMART/](https://atharav9927.github.io/STOCKSMART/)
+- **Landing Page**: Real-time telemetry, 6 connected hubs, system architecture, and 1-click role demo launcher.
+- **Operator Login**: Form-validated credentials with bypass profile switcher and password recovery flows.
 
 ---
 
