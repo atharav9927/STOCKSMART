@@ -1,7 +1,7 @@
 services:
-  # Option 1: Render Static Site (Fast, Free, Global CDN, SSL)
+  # Frontend: Render Static Site (Global CDN, SSL, Free)
   - type: web
-    name: stocksmart-static
+    name: stocksmart-frontend
     runtime: static
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist/stocksmart/browser
@@ -11,15 +11,27 @@ services:
         source: /*
         destination: /index.html
 
-  # Option 2: Render Node.js Web Service (Express Production Server)
+  # Backend: Spring Boot REST API (Java 21/25, JWT, JPA)
   - type: web
-    name: stocksmart-service
-    runtime: node
+    name: stocksmart-api
+    runtime: java
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm run start:prod
+    rootDir: backend
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/backend-0.0.1-SNAPSHOT.jar
     envVars:
-      - key: NODE_ENV
-        value: production
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
       - key: PORT
-        value: 10000
+        value: 8080
+      - key: DATABASE_URL
+        fromDatabase:
+          name: stocksmart-db
+          property: connectionString
+
+# Cloud PostgreSQL Database
+databases:
+  - name: stocksmart-db
+    databaseName: stocksmart
+    user: stocksmart_user
+    plan: free

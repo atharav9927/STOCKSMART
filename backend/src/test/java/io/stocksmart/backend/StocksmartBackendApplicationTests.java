@@ -1,0 +1,13 @@
+package io.stocksmart.backend;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class StocksmartBackendApplicationTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
