@@ -184,6 +184,11 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/procurement/rules/procurement-rules.component').then(m => m.ProcurementRulesComponent),
           },
+          {
+            path: 'returns',
+            loadComponent: () =>
+              import('./features/procurement/returns/procurement-returns.component').then(m => m.ProcurementReturnsComponent),
+          },
         ],
       },
       // Suppliers
@@ -289,6 +294,11 @@ export const routes: Routes = [
             loadComponent: () =>
               import('./features/reports/abc-analysis/abc-analysis.component').then(m => m.AbcAnalysisComponent),
           },
+          {
+            path: 'shrinkage',
+            loadComponent: () =>
+              import('./features/reports/shrinkage-report/shrinkage-report.component').then(m => m.ShrinkageReportComponent),
+          },
         ],
       },
       // Alerts
@@ -332,6 +342,16 @@ export const routes: Routes = [
             path: 'settings',
             loadComponent: () =>
               import('./features/admin/system-settings/system-settings.component').then(m => m.SystemSettingsComponent),
+          },
+          {
+            path: 'roles',
+            loadComponent: () =>
+              import('./features/admin/roles/admin-roles.component').then(m => m.AdminRolesComponent),
+          },
+          {
+            path: 'data',
+            loadComponent: () =>
+              import('./features/admin/data/admin-data.component').then(m => m.AdminDataComponent),
           },
         ],
       },

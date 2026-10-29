@@ -16,7 +16,8 @@ import {
   AuditLogEntry,
   ReasonCode,
   ReorderSuggestion,
-  User
+  User,
+  VendorReturn
 } from '../models';
 
 @Injectable({ providedIn: 'root' })
@@ -39,6 +40,7 @@ export class MockDataService {
   readonly reasonCodes = signal<ReasonCode[]>(this.generateReasonCodes());
   readonly users = signal<User[]>(this.generateUsers());
   readonly suggestions = signal<ReorderSuggestion[]>([]);
+  readonly vendorReturns = signal<VendorReturn[]>(this.generateVendorReturns());
 
   // Active selected location for topbar switcher
   readonly selectedLocationId = signal<string>('all');
@@ -1110,5 +1112,115 @@ export class MockDataService {
 
     const stock = this.stockLevels().filter(s => s.productId === product.id);
     return { product, stock };
+  }
+
+  private generateVendorReturns(): VendorReturn[] {
+    return [
+      {
+        id: 'rtv-1',
+        returnNumber: 'RTV-2026-001',
+        purchaseOrderId: 'po-1',
+        poNumber: 'PO-2026-0001',
+        supplierId: 'sup-1',
+        supplierName: 'Apex Electronics Global',
+        locationId: 'loc-1',
+        locationName: 'Central Distribution Center (CDC)',
+        status: 'credit_received',
+        reason: 'defective',
+        totalCreditExpected: 3450.00,
+        creditNoteNumber: 'CR-APEX-8891',
+        notes: '3 units with fractured LCD ribbons returned under supplier warranty.',
+        createdBy: 'Marcus Vance',
+        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+        items: [
+          {
+            id: 'rtvi-1',
+            productId: 'prod-1',
+            productSku: 'SKU-00001',
+            productName: 'Pro Display Panel 27"',
+            quantity: 3,
+            unitCost: 1150.00,
+            totalCost: 3450.00,
+            reason: 'Display flicker and dead pixel lines upon initial power on'
+          }
+        ]
+      },
+      {
+        id: 'rtv-2',
+        returnNumber: 'RTV-2026-002',
+        purchaseOrderId: 'po-3',
+        poNumber: 'PO-2026-0003',
+        supplierId: 'sup-2',
+        supplierName: 'Vanguard Industrial Supplies',
+        locationId: 'loc-2',
+        locationName: 'North Regional Hub (NRH)',
+        status: 'dispatched',
+        reason: 'over_shipment',
+        totalCreditExpected: 1840.00,
+        notes: 'Excess 40 packaging cartons delivered beyond Purchase Order limit.',
+        createdBy: 'Sarah Lin',
+        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        items: [
+          {
+            id: 'rtvi-2',
+            productId: 'prod-2',
+            productSku: 'SKU-00002',
+            productName: 'Heavy Duty Thermal Roll Pack',
+            quantity: 40,
+            unitCost: 46.00,
+            totalCost: 1840.00,
+            reason: 'Delivered 140 units on PO specifying 100 units'
+          }
+        ]
+      },
+      {
+        id: 'rtv-3',
+        returnNumber: 'RTV-2026-003',
+        supplierId: 'sup-3',
+        supplierName: 'Pacific Component Corp',
+        locationId: 'loc-1',
+        locationName: 'Central Distribution Center (CDC)',
+        status: 'pending_approval',
+        reason: 'recall',
+        totalCreditExpected: 5200.00,
+        notes: 'Manufacturer Technical Bulletin #TB-26-09 battery batch recall.',
+        createdBy: 'David Kim',
+        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+        items: [
+          {
+            id: 'rtvi-3',
+            productId: 'prod-4',
+            productSku: 'SKU-00004',
+            productName: 'Li-Ion Handheld Battery Pack 4500mAh',
+            quantity: 80,
+            unitCost: 65.00,
+            totalCost: 5200.00,
+            reason: 'Factory recall lot batch #B-902'
+          }
+        ]
+      }
+    ];
+  }
+
+  createVendorReturn(rtv: Partial<VendorReturn>): VendorReturn {
+    const returnNumber = `RTV-2026-${String(this.vendorReturns().length + 1).padStart(3, '0')}`;
+    const newRtv: VendorReturn = {
+      id: `rtv-${Date.now()}`,
+      returnNumber,
+      supplierId: rtv.supplierId || 'sup-1',
+      supplierName: rtv.supplierName || 'Apex Electronics Global',
+      locationId: rtv.locationId || 'loc-1',
+      locationName: rtv.locationName || 'Central Distribution Center (CDC)',
+      status: 'pending_approval',
+      reason: rtv.reason || 'defective',
+      totalCreditExpected: rtv.totalCreditExpected || 0,
+      notes: rtv.notes || '',
+      createdBy: 'Marcus Vance',
+      createdAt: new Date().toISOString(),
+      items: rtv.items || []
+    };
+
+    this.vendorReturns.update(list => [newRtv, ...list]);
+    return newRtv;
   }
 }

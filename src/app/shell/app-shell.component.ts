@@ -614,6 +614,7 @@ export class AppShellComponent {
       roles: ['admin', 'inventory_manager', 'buyer'],
       children: [
         { label: 'Purchase Orders', route: '/procurement/orders' },
+        { label: 'Vendor Returns (RTV)', route: '/procurement/returns' },
         { label: 'Suggestions', route: '/procurement/suggestions' },
         { label: 'Policies & Rules', route: '/procurement/rules' },
       ],
@@ -651,6 +652,7 @@ export class AppShellComponent {
         { label: 'Stock Valuation', route: '/reports/valuation' },
         { label: 'Stockouts & Depletion', route: '/reports/stockouts' },
         { label: 'ABC Pareto Analysis', route: '/reports/abc' },
+        { label: 'Shrinkage & Loss', route: '/reports/shrinkage' },
       ],
     },
     {
@@ -664,9 +666,11 @@ export class AppShellComponent {
       label: 'Admin', icon: '⚙', route: '/admin',
       roles: ['admin'],
       children: [
-        { label: 'Users & Roles', route: '/admin/users' },
+        { label: 'Users & Clearances', route: '/admin/users' },
+        { label: 'Role Permissions', route: '/admin/roles' },
         { label: 'Audit Log', route: '/admin/audit' },
         { label: 'Reason Codes', route: '/admin/reason-codes' },
+        { label: 'Data Management', route: '/admin/data' },
         { label: 'System Architecture', route: '/admin/settings' },
       ],
     },

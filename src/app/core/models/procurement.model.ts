@@ -93,3 +93,33 @@ export interface StatusHistoryEntry {
   changedAt: string;
   notes: string;
 }
+
+export interface VendorReturn {
+  id: string;
+  returnNumber: string;
+  purchaseOrderId?: string;
+  poNumber?: string;
+  supplierId: string;
+  supplierName: string;
+  locationId: string;
+  locationName: string;
+  status: 'draft' | 'pending_approval' | 'dispatched' | 'credit_received' | 'rejected';
+  reason: 'defective' | 'damaged_in_transit' | 'over_shipment' | 'expired' | 'incorrect_item' | 'recall';
+  items: VendorReturnItem[];
+  totalCreditExpected: number;
+  creditNoteNumber?: string;
+  notes: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface VendorReturnItem {
+  id: string;
+  productId: string;
+  productSku: string;
+  productName: string;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+  reason: string;
+}
