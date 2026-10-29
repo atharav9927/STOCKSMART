@@ -19,16 +19,20 @@ import { AuthService } from '../../core/services/auth.service';
 
         <nav class="header-nav">
           <a href="#capabilities" class="nav-link">CAPABILITIES</a>
-          <a href="#architecture" class="nav-link">ARCHITECTURE</a>
           <a href="#roles" class="nav-link">ROLES</a>
+          <a href="#architecture" class="nav-link">ARCHITECTURE</a>
+          <a routerLink="/login" class="nav-link">OPERATOR LOGIN</a>
           <a href="https://github.com/atharavagarwal/STOCKSMART" target="_blank" rel="noopener" class="nav-link">GITHUB</a>
         </nav>
 
         <div class="header-actions">
           @if (auth.isLoggedIn()) {
-            <a routerLink="/dashboard" class="btn btn--primary">
+            <a routerLink="/dashboard" class="btn btn--primary btn--sm">
               [ ENTER CONSOLE: {{ auth.userName() }} ]
             </a>
+            <button class="btn btn--outline btn--sm" (click)="logout()">
+              [ LOGOUT ]
+            </button>
           } @else {
             <a routerLink="/login" class="btn btn--outline btn--sm">
               [ OPERATOR LOGIN ]
@@ -244,6 +248,48 @@ import { AuthService } from '../../core/services/auth.service';
               <li>Render Monorepo Blueprint (Static + Java + PostgreSQL)</li>
               <li>Automatic Master Data Seeder on First Boot</li>
             </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Security Clearance & Login Section -->
+      <section id="access" class="section">
+        <div class="section-header">
+          <span class="text-label text-secondary">SYSTEM ACCESS</span>
+          <h2 class="section-title text-display">OPERATOR CLEARANCE & DEMO MODES</h2>
+        </div>
+
+        <div class="access-grid">
+          <div class="access-card">
+            <div class="access-card__header">
+              <span class="access-badge text-mono">METHOD 01</span>
+              <span class="access-title">CREDENTIAL-BASED LOGIN</span>
+            </div>
+            <p class="access-desc text-caption text-secondary">
+              Authenticate using registered operator credentials with JWT authorization. Supports role clearance enforcement, session persistence, and password reset flows.
+            </p>
+            <div class="access-cta">
+              <a routerLink="/login" class="btn btn--primary btn--lg">
+                [ OPEN DEDICATED LOGIN PAGE → ]
+              </a>
+            </div>
+          </div>
+
+          <div class="access-card access-card--demo">
+            <div class="access-card__header">
+              <span class="access-badge text-mono">METHOD 02</span>
+              <span class="access-title">ONE-CLICK ROLE DEMO CLEARANCE</span>
+            </div>
+            <p class="access-desc text-caption text-secondary">
+              Instant bypass with pre-configured role profiles. Explore all 42 views, real-time matrix, camera barcode scanner, and audit ledger without typing credentials.
+            </p>
+            <div class="demo-buttons">
+              <button class="btn btn--secondary btn--sm" (click)="quickLogin('admin')">[ ADMIN ]</button>
+              <button class="btn btn--secondary btn--sm" (click)="quickLogin('inventory_manager')">[ MANAGER ]</button>
+              <button class="btn btn--secondary btn--sm" (click)="quickLogin('buyer')">[ BUYER ]</button>
+              <button class="btn btn--secondary btn--sm" (click)="quickLogin('store_clerk')">[ CLERK ]</button>
+              <button class="btn btn--secondary btn--sm" (click)="quickLogin('viewer')">[ AUDITOR ]</button>
+            </div>
           </div>
         </div>
       </section>
@@ -542,6 +588,63 @@ import { AuthService } from '../../core/services/auth.service';
       background: #222222;
     }
 
+    /* === Access / Clearance Section === */
+    .access-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-lg);
+    }
+    .access-card {
+      background: #0A0A0A;
+      border: 1px solid #222222;
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      transition: border-color var(--transition-fast);
+      &:hover {
+        border-color: #444444;
+      }
+    }
+    .access-card__header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .access-badge {
+      font-size: 11px;
+      color: var(--black);
+      background: var(--text-display);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+    }
+    .access-title {
+      font-family: var(--font-data);
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      color: var(--text-display);
+      font-weight: 600;
+    }
+    .access-desc {
+      line-height: 1.5;
+    }
+    .access-cta {
+      margin-top: auto;
+      a {
+        width: 100%;
+        text-align: center;
+        text-decoration: none;
+      }
+    }
+    .demo-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      margin-top: auto;
+    }
+
     /* === Footer === */
     .landing-footer {
       padding: var(--space-xl);
@@ -570,6 +673,7 @@ import { AuthService } from '../../core/services/auth.service';
       .telemetry-strip { grid-template-columns: 1fr 1fr; }
       .capabilities-grid { grid-template-columns: 1fr; }
       .roles-grid { grid-template-columns: 1fr; }
+      .access-grid { grid-template-columns: 1fr; }
       .landing-footer { flex-direction: column; gap: var(--space-md); text-align: center; }
     }
   `]
@@ -577,6 +681,10 @@ import { AuthService } from '../../core/services/auth.service';
 export class LandingPageComponent {
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+
+  logout(): void {
+    this.auth.logout();
+  }
 
   quickLogin(role: 'admin' | 'inventory_manager' | 'buyer' | 'store_clerk' | 'viewer'): void {
     const emailMap: Record<string, string> = {
